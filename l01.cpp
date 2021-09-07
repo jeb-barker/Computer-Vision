@@ -4,7 +4,7 @@
 #include<vector>
 #include <time.h>
 
-#define SIZE 100
+#define SIZE 800
 
 using namespace std;
 class Triangle{
@@ -62,52 +62,70 @@ void bresenham_neg(int(*grid)[SIZE], int x1, int y1, int x2, int y2){
         m += dy;
     }
 };
+
+void printVector(int index, vector<int> & vec){
+    cout << vec[0] << " " << vec[1] << " " << index << endl; 
+};
+
 int main()
 {
     const int size = SIZE;
     srand(time(NULL));
     ofstream drawing;
     Triangle t;
-    vector<int>* a;
-    vector<int>* b;
-    vector<int>* c;
-    vector<int>*(points)[4] = {a, b, c}; 
+    // vector<int>* a;
+    // vector<int>* b;
+    // vector<int>* c;
+    // vector<int>* d;
+    vector<int>*points[4]; 
     for(int x = 0; x < 3; x++){
         points[x] = t.trianglepts();
     }
-    points[3] = a;
+    points[3] = points[0];
+
+    printVector(0, *points[0]);
+    printVector(1, *points[1]);
+    printVector(2, *points[2]);
+    printVector(3, *points[3]);
+    // cout << d << endl;
+    // cout << a << endl;
+    
+
     //points contains 3 points (vector<int> with x, y) that represent points of a triangle
     int(*grid)[SIZE] = new int[SIZE][SIZE];
     // bresenham_pos(grid, 0, 0, 800, 800);
     // bresenham_neg(grid, 0, 800, 800, 0);
+
     for(int t = 0; t < 3; t++){
-        vector<int>* one = points[t];
-        vector<int>* two = points[t+1];
-        if(((*two)[0] - (*one)[0]) < 0){
-            if(((*two)[1] - (*one)[1]) < 0){
-                bresenham_neg(grid, (*two)[0], (*two)[1], (*one)[0], (*one)[1]);
+        cout << (*points[t+1])[0] - (*points[t])[0] << endl;
+        if(((*points[t+1])[0] - (*points[t])[0]) < 0){
+            if(((*points[t+1])[1] - (*points[t])[1]) < 0){
+                bresenham_neg(grid, (*points[t+1])[0], (*points[t+1])[1], (*points[t])[0], (*points[t])[1]);
             }
             else{
-                bresenham_pos(grid, (*two)[0], (*two)[1], (*one)[0], (*one)[1]);
+                bresenham_pos(grid, (*points[t+1])[0], (*points[t+1])[1], (*points[t])[0], (*points[t])[1]);
             } 
         }
         else{
-            if(((*two)[1] - (*one)[1]) < 0){
-                bresenham_neg(grid, (*one)[0], (*one)[1], (*two)[0], (*two)[1]);
+            if(((*points[t+1])[1] - (*points[t])[1]) < 0){
+                bresenham_neg(grid, (*points[t])[0], (*points[t])[1], (*points[t+1])[0], (*points[t+1])[1]);
             }
             else{
-                bresenham_pos(grid, (*one)[0], (*one)[1], (*two)[0], (*two)[1]);
+                bresenham_pos(grid, (*points[t])[0], (*points[t])[1], (*points[t+1])[0], (*points[t+1])[1]);
             }
         }
-        delete one, two;
     }
+    cout << "abt to open file";
     drawing.open("drawing.ppm");
-    drawing << "P3 100 100 255";
+    cout << "opened";
+    drawing << "P3 800 800 255";
     for(int i=0; i< size; i++){
         drawing << "\n";
-        for(int j=0; j< size; j++){
+        for(int j=0; j < size; j++){
+            // cout << "abt to check draw";
             if(grid[i][j] == 10){
                 drawing << "0 0 0 ";
+                // cout << "drawing pixel" << endl;
             }
             else{
                 drawing << "255 255 255 ";
@@ -115,9 +133,10 @@ int main()
         }
     }
     drawing.close();
-    delete points;
     delete grid;
-    delete a, b, c;
+    for(int x = 0; x < 3; x++){
+        delete points[x];
+    }
     return 0;
 }
 
