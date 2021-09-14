@@ -5,7 +5,7 @@
 #include <time.h>
 #include <math.h>
 
-#define SIZE 1200
+#define SIZE 800
 
 using namespace std;
 //Canvas class has a method that returns a randomized point --> used to generate 3 points for the Triangle, Euler line, etc.
@@ -33,26 +33,112 @@ class Canvas{
         vector<double> calculateIncirclePoints(){
             double a, b, c;
             vector<double> incirclePoint;
+            cout << endl;
+            cout << (*trianglePoints)[0][0] << ", " << (*trianglePoints)[0][1] << endl;
+            cout << (*trianglePoints)[1][0] << ", " << (*trianglePoints)[1][1] << endl;
+            cout << (*trianglePoints)[2][0] << ", " << (*trianglePoints)[2][1] << endl;
             
-            a = distance((*trianglePoints)[0], (*trianglePoints)[1]);
-            b = distance((*trianglePoints)[1], (*trianglePoints)[2]);
-            c = distance((*trianglePoints)[2], (*trianglePoints)[0]);
+            a = distance((*trianglePoints)[1], (*trianglePoints)[2]);
+            b = distance((*trianglePoints)[2], (*trianglePoints)[0]);
+            c = distance((*trianglePoints)[0], (*trianglePoints)[1]);
 
             double s;
             s = (a+b+c)/2;
 
             double x, y;
-            x = (a*(*trianglePoints)[0][0] + b*(*trianglePoints)[1][0] + c*(*trianglePoints)[2][0])/(a+b+c); 
-            y = (a*(*trianglePoints)[0][1] + b*(*trianglePoints)[1][1] + c*(*trianglePoints)[2][1])/(a+b+c); 
+            x = (a * (*trianglePoints)[0][0] + b * (*trianglePoints)[1][0] + c * (*trianglePoints)[2][0])/(a+b+c); 
+            y = (a * (*trianglePoints)[0][1] + b * (*trianglePoints)[1][1] + c * (*trianglePoints)[2][1])/(a+b+c); 
             incirclePoint.push_back(x);
             incirclePoint.push_back(y);
 
+            double cirx, ciry;
+            // //(Ax2*Ay2))
+            // double d = (*trianglePoints)[0][0]*((*trianglePoints)[1][1]-(*trianglePoints)[2][1])+(*trianglePoints)[1][0]*((*trianglePoints)[2][1]-(*trianglePoints)[0][1])+(*trianglePoints)[2][0]*((*trianglePoints)[0][1]-(*trianglePoints)[1][1]);
+            // cirx = (((*trianglePoints)[0][0]*(*trianglePoints)[0][0]+(*trianglePoints)[0][1]*(*trianglePoints)[0][1])*((*trianglePoints)[1][1]-(*trianglePoints)[2][1])+((*trianglePoints)[1][0]*(*trianglePoints)[1][0]+(*trianglePoints)[1][1]*(*trianglePoints)[1][1])*((*trianglePoints)[2][1]-(*trianglePoints)[0][1])+((*trianglePoints)[2][0]*(*trianglePoints)[2][0]+(*trianglePoints)[2][1]*(*trianglePoints)[2][1])*((*trianglePoints)[1][1]-(*trianglePoints)[0][1]))/d;
+            // ciry = (((*trianglePoints)[0][0]*(*trianglePoints)[0][0]+(*trianglePoints)[0][1]*(*trianglePoints)[0][1])*((*trianglePoints)[1][0]-(*trianglePoints)[2][0])+((*trianglePoints)[1][0]*(*trianglePoints)[1][0]+(*trianglePoints)[1][1]*(*trianglePoints)[1][1])*((*trianglePoints)[2][0]-(*trianglePoints)[0][0])+((*trianglePoints)[2][0]*(*trianglePoints)[2][0]+(*trianglePoints)[2][1]*(*trianglePoints)[2][1])*((*trianglePoints)[1][0]-(*trianglePoints)[0][0]))/d;
+
+            double midx1, midx2, midy1, midy2, midy3, midx3, midx4, midy4;
+            //double m1, m2;
+            //m1 = ((*trianglePoints)[1][1]-(*trianglePoints)[1][0])/((*trianglePoints)[1][0]-(*trianglePoints)[0][0]);
+            midx1 = ((*trianglePoints)[0][0]+(*trianglePoints)[1][0])/2;
+            midy1 = ((*trianglePoints)[0][1]+(*trianglePoints)[1][1])/2;
+            midx2 = midx1 - (*trianglePoints)[1][1]+(*trianglePoints)[0][1];
+            midy2 = midy1 + (*trianglePoints)[1][0]-(*trianglePoints)[0][0];
+
+            midx3 = ((*trianglePoints)[1][0]+(*trianglePoints)[2][0])/2;
+            midy3 = ((*trianglePoints)[1][1]+(*trianglePoints)[2][1])/2;
+            midx4 = midx3 - (*trianglePoints)[2][1]+(*trianglePoints)[1][1];
+            midy4 = midy3 + (*trianglePoints)[2][0]-(*trianglePoints)[1][0];
+            cout << midx1 << " " << midy1 << endl << midx2 << " " << midy2 << endl << midx3 << " " << midy3 << endl << midx4 << " " << midy4 << endl;
+
+            // Line AB represented as a1x + b1y = c1
+            double a1 = midy2 - midy1;
+            double b1 = midx1 - midx2;
+            double c1 = a1*(midx1) + b1*(midy1);
+
+            // Line CD represented as a2x + b2y = c2
+            double a2 = midy4 - midy3;
+            double b2 = midx3 - midx4;
+            double c2 = a2*(midx3)+ b2*(midy3);
+            double determinant = a1*b2 - a2*b1;
+            cirx = (b2*c1 - b1*c2)/determinant;
+            ciry = (a1*c2 - a2*c1)/determinant;
+            //cout << endl << cirx << ", " << ciry << endl; 
+
+            double orthox1, orthoy1, orthox2, orthoy2;
+            double x1, x2, x3, y1, y2, y3;
+            x1 = (*trianglePoints)[0][0];
+            x2 = (*trianglePoints)[1][0];
+            x3 = (*trianglePoints)[2][0];
+            y1 = (*trianglePoints)[0][1];
+            y2 = (*trianglePoints)[1][1];
+            y3 = (*trianglePoints)[2][1];
+            orthox1 = (x1 - (y3-y2));
+            orthoy1 = (y1 + (x3-x2));
+            orthox2 = (x2 - (y3-y1));
+            orthoy2 = (y2 + (x3-x1));
+            // bresenham_pos((int)(x1*SIZE), (int)(y1*SIZE), (int)(orthox1*SIZE), (int)(orthoy1*SIZE));
+            // bresenham_pos((int)(x2*SIZE), (int)(y2*SIZE), (int)(orthox2*SIZE), (int)(orthoy2*SIZE));
+            // Line AB represented as a1x + b1y = c1
+            a1 = orthoy1 - y1;
+            b1 = x1 - orthox2;
+            c1 = a1*(x1) + b1*(y1);
+
+            // Line CD represented as a2x + b2y = c2
+            a2 = orthoy2 - y2;
+            b2 = x2 - orthox2;
+            c2 = a2*(x2)+ b2*(y2);
+            determinant = a1*b2 - a2*b1;
+            double orthox, orthoy;
+            orthox = (b2*c1 - b1*c2)/determinant;
+            orthoy = (a1*c2 - a2*c1)/determinant;
+
             double r, R;
             r = sqrt(((s-a)*(s-b)*(s-c))/(s));
-            R = ((a*b*c)/(4.0*r*s));
+            R = ((a*b*c)/(4*r*s));
             incirclePoint.push_back(r);
             incirclePoint.push_back(R);
-            cout << r << " - " << R << endl;
+            cout << x << " - " << y << " - " << r << " - " << R << endl;
+
+            incirclePoint.push_back(cirx);
+            incirclePoint.push_back(ciry);
+
+            incirclePoint.push_back(orthox);
+            incirclePoint.push_back(orthoy);
+            
+            double nineptx, ninepty;
+            nineptx = (cirx+orthox)/2.0;
+            ninepty = (ciry+orthoy)/2.0;
+            incirclePoint.push_back(nineptx);
+            incirclePoint.push_back(ninepty);
+            vector<double> v1, v2;
+            v1.push_back(nineptx);
+            v1.push_back(ninepty);
+            v2.push_back((x2+x1)/2.0);
+            v2.push_back((y2+y1)/2.0);
+            incirclePoint.push_back(distance(v1, v2));
+            cout << "9pt: " << nineptx << ", " << ninepty << ":: " << distance(v1, v2) << endl;
+
             return incirclePoint;
         }
         
@@ -94,14 +180,16 @@ class Canvas{
             int x = 0;
             int y = r;
             int ty = 3 - (2*r);
-            grid[x1 + x][y1 + y] = 10;
-            grid[x1 + x][y1 - y] = 10;
-            grid[x1 - x][y1 + y] = 10;
-            grid[x1 - x][y1 - y] = 10;
-            grid[x1 + y][y1 + x] = 10;
-            grid[x1 + y][y1 - x] = 10;
-            grid[x1 - y][y1 + x] = 10;
-            grid[x1 - y][y1 - x] = 10;
+            //if(!(x1+x > SIZE || x1-x < 0 || x1 +y > SIZE || x1-y < 0 || y1+x > SIZE || y1-x < 0 || y1 +y > SIZE || y1-y < 0)){
+            if(x1+x < SIZE && y1+y < SIZE && x1+x >= 0 && y1+y >= 0){grid[x1 + x][y1 + y] = 10;}
+            if(x1+x < SIZE && y1-y < SIZE && x1+x >= 0 && y1-y >= 0){grid[x1 + x][y1 - y] = 10;}
+            if(x1-x < SIZE && y1+y < SIZE && x1-x >= 0 && y1+y >= 0){grid[x1 - x][y1 + y] = 10;}
+            if(x1-x < SIZE && y1-y < SIZE && x1-x >= 0 && y1-y >= 0){grid[x1 - x][y1 - y] = 10;}
+            if(x1+y < SIZE && y1+x < SIZE && x1+y >= 0 && y1+x >= 0){grid[x1 + y][y1 + x] = 10;}
+            if(x1-y < SIZE && y1+x < SIZE && x1-y >= 0 && y1+x >= 0){grid[x1 - y][y1 + x] = 10;}
+            if(x1+y < SIZE && y1-x < SIZE && x1+y >= 0 && y1-x >= 0){grid[x1 + y][y1 - x] = 10;}
+            if(x1-y < SIZE && y1-x < SIZE && x1-y >= 0 && y1-x >= 0){grid[x1 - y][y1 - x] = 10;}
+            //}
 
             while(y >= x){
                 //increment clockwise
@@ -113,14 +201,14 @@ class Canvas{
                 else{
                     ty = ty + (4 * x) + 6;
                 }
-                grid[x1 + x][y1 + y] = 10;
-                grid[x1 + x][y1 - y] = 10;
-                grid[x1 - x][y1 + y] = 10;
-                grid[x1 - x][y1 - y] = 10;
-                grid[x1 + y][y1 + x] = 10;
-                grid[x1 + y][y1 - x] = 10;
-                grid[x1 - y][y1 + x] = 10;
-                grid[x1 - y][y1 - x] = 10;
+                if(x1+x < SIZE && y1+y < SIZE && x1+x >= 0 && y1+y >= 0){grid[x1 + x][y1 + y] = 10;}
+                if(x1+x < SIZE && y1-y < SIZE && x1+x >= 0 && y1-y >= 0){grid[x1 + x][y1 - y] = 10;}
+                if(x1-x < SIZE && y1+y < SIZE && x1-x >= 0 && y1+y >= 0){grid[x1 - x][y1 + y] = 10;}
+                if(x1-x < SIZE && y1-y < SIZE && x1-x >= 0 && y1-y >= 0){grid[x1 - x][y1 - y] = 10;}
+                if(x1+y < SIZE && y1+x < SIZE && x1+y >= 0 && y1+x >= 0){grid[x1 + y][y1 + x] = 10;}
+                if(x1-y < SIZE && y1+x < SIZE && x1-y >= 0 && y1+x >= 0){grid[x1 - y][y1 + x] = 10;}
+                if(x1+y < SIZE && y1-x < SIZE && x1+y >= 0 && y1-x >= 0){grid[x1 + y][y1 - x] = 10;}
+                if(x1-y < SIZE && y1-x < SIZE && x1-y >= 0 && y1-x >= 0){grid[x1 - y][y1 - x] = 10;}
 
             }
 
@@ -152,7 +240,7 @@ class Canvas{
                 int j = y1;
                 int m = dy - dx;
                 for(int i = x1; i < x2; i++){
-                    grid[i][j] = 10;
+                    if(i >= 0 && i < SIZE && j >= 0 && j < SIZE){grid[i][j] = 10;}
 
                     if(m >= 0){
                         j += inc;
@@ -170,7 +258,7 @@ class Canvas{
                 int i = x1;
                 int m = dx - dy;
                 for(int j = y1; j < y2; j++){
-                    grid[i][j] = 10;
+                    if(i >= 0 && i < SIZE && j >= 0 && j < SIZE){grid[i][j] = 10;}
                     if(m >= 0){
                         i += inc;
                         m -= dy;
@@ -231,8 +319,37 @@ class Canvas{
         void incircle(){
             vector<double> pt = calculateIncirclePoints();
             cout << (int)(pt[0] * SIZE) << ", " << (int)(pt[1] * SIZE) << endl;
+            cout << (int)(pt[4] * SIZE) << ", " << (int)(pt[5] * SIZE) << endl;
             drawCircle((int)(pt[0] * SIZE), (int)(pt[1] * SIZE), (int)(pt[2] * SIZE));
-            drawCircle((int)(pt[0] * SIZE), (int)(pt[1] * SIZE), (int)(pt[3] * SIZE));
+            drawCircle((int)(pt[4] * SIZE), (int)(pt[5] * SIZE), (int)(pt[3] * SIZE));
+            double orthox, orthoy;
+            double circumx, circumy;
+            circumx = pt[4];
+            circumy = pt[5];
+            orthox = pt[6];
+            orthoy = pt[7];
+            double dx = orthox - circumx;
+            double dy = orthoy - circumy;
+            while(circumx < SIZE && circumx > 0){
+                circumx -= dx;
+                circumy -= dy;
+            }
+            while(orthox < SIZE && orthox > 0){
+                orthox += dx;
+                orthoy += dy;
+            }
+            dx = orthox - circumx;
+            int x1 = (int)(circumx*SIZE);
+            int x2 = (int)(orthox*SIZE);
+            int y1 = (int)(circumy*SIZE);
+            int y2 = (int)(orthoy*SIZE);
+            if(dx < 0){
+                bresenham_pos(x2, y2, x1, y1);
+            }
+            else{
+                bresenham_pos(x1, y1, x2, y2);
+            }
+            drawCircle((int)(pt[8] * SIZE), (int)(pt[9] * SIZE), (int)(pt[10] * SIZE));
         }
 
         void draw_grid(){
