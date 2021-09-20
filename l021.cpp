@@ -16,29 +16,29 @@ class Line{
         double dy;
         double m;
     public:
-    Line(){}
-    Line(double x1, double y1, double x2, double y2){
-        a = new Point(x1, y1);
-        b = new Point(x2, y2);
-        dx = x2 - x1;
-        dy = y2 - y1;
-        m = dy / dx;
-    }
-    double distance(){
-        return sqrt((pow((dx), 2.0)+pow((dy), 2.0)));
-    }
-    double getdx(){
-        return dx;
-    }
-    double getdy(){
-        return dy;
-    }
-    Point* getA(){
-        return a; 
-    }
-    Point* getB(){
-        return b;
-    }
+        Line(){}
+        Line(double x1, double y1, double x2, double y2){
+            a = new Point(x1, y1);
+            b = new Point(x2, y2);
+            dx = x2 - x1;
+            dy = y2 - y1;
+            m = dy / dx;
+        }
+        double distance(){
+            return sqrt((pow((dx), 2.0)+pow((dy), 2.0)));
+        }
+        double getdx(){
+            return dx;
+        }
+        double getdy(){
+            return dy;
+        }
+        Point* getA(){
+            return a; 
+        }
+        Point* getB(){
+            return b;
+        }
     //!must delete pointer after done! Finds intersection point between this Line and other Line.
     //Uses vector algebra to find intersection
     Point* intersection(Line other){
@@ -83,21 +83,17 @@ class Point{
 };
 class Canvas{
     private:
-        vector<vector<double>>* polygonPoints;
+        vector<Point>* polygonPoints;
         int(*grid)[SIZE];
+        Point points;
     public:
         Canvas(){
-            polygonPoints = new vector<vector<double>>();
+            polygonPoints = new vector<Point>();
             grid = new int[SIZE][SIZE];
         }
 
-        double distance(vector<double> a, vector<double> b){
-            double x1 = a[0];
-            double y1 = a[1];
-
-            double x2 = b[0];
-            double y2 = b[1];
-            return sqrt((pow((x2-x1), 2.0)+pow((y2-y1), 2.0)));
+        double distance(Point a, Point b){
+            Line a = Line(a.getx(), a.gety(), b.getx(), b.gety());
         }
 
         //Helper Method --> The Bresenham algorithm that works in all cases.
@@ -149,23 +145,20 @@ class Canvas{
             }
         };
 
-        void addToPoints(vector<double> a){
+        void addToPoints(Point a){
             (*polygonPoints).push_back(a);
         }
 
-        vector<int>* generatepts(){
-            vector<double> dblpoints;
-            vector<int>* points;
-            points = new vector<int>;
-            dblpoints.push_back(( (double) rand() ) / (RAND_MAX) );
-            dblpoints.push_back(( (double) rand() ) / (RAND_MAX) );
-
-            addToPoints(dblpoints);
-
-            (*points).push_back(int(dblpoints[0] * double(SIZE)));
-            (*points).push_back(int(dblpoints[1] * double(SIZE)));
-            cout << ( (double) rand() ) / (RAND_MAX); 
+        Point generatept(){
+            Point points;
+            points = Point(( (double) rand() ) / (RAND_MAX), ( (double) rand() ) / (RAND_MAX));
             return points;
+        }
+        //generate n (where n is a positive integer) Points, returns the class member variable polygonPoints which is a vector<Point*>
+        vector<Point>* generatePoints(int n){
+            for(int x = 0; x < n; x++){
+
+            }
         }
 
         void draw_grid(){
