@@ -154,11 +154,12 @@ class Canvas{
             points = Point(( (double) rand() ) / (RAND_MAX), ( (double) rand() ) / (RAND_MAX));
             return points;
         }
-        //generate n (where n is a positive integer) Points, returns the class member variable polygonPoints which is a vector<Point*>
+        //generate n (where n is a positive integer) Points, and then add them to polygonPoints. returns the class member variable polygonPoints which is a vector<Point*>
         vector<Point>* generatePoints(int n){
             for(int x = 0; x < n; x++){
-
+                addToPoints(generatept());
             }
+            return polygonPoints;
         }
 
         void draw_grid(){
