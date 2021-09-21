@@ -76,8 +76,6 @@ class Line{
         if(determinant == 0){
             return Point(5.0, 5.0);
         }
-        (b2*c1 - b1*c2)/determinant;
-        (a1*c2 - a2*c1)/determinant;
         Point ret = Point((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
         return ret;
     }
@@ -249,6 +247,6 @@ int main()
 
     //cleanup
     delete t;
-    delete lines, points;
+    delete lines;
     return 0;
 }
