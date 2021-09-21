@@ -211,17 +211,23 @@ int main()
     (*points).pop_back();
     bool valid = false;
     Point testpt;
-    int intersections = 0;
-    int vertexIntersections = 0;
+    int intersections;
+    int vertexIntersections;
     while(!valid){
+        intersections = 0;
+        vertexIntersections = 0;
         testpt = (*t).generatept();
-        Line testLine = Line(testpt.getx(), testpt.gety(), testpt.getx()+1.0, testpt.gety());
+        Line testLine = Line(0.0, testpt.gety(), testpt.getx(), testpt.gety());
         for(int x = 0; x < 3; x++){
             Point intersection = testLine.intersection((*lines)[x]);
             if(intersection.getx() == 5.0 && intersection.gety() == 5.0){
-                intersections++;
+                cout << "COLINEAR!!!" << endl;
             }
-            if(( (*lines)[x].getA().getx() > intersection.getx() && (*lines)[x].getB().getx() > intersection.getx() ) || ( (*lines)[x].getA().getx() < intersection.getx() && (*lines)[x].getB().getx() < intersection.getx() )){
+            if(( (*lines)[x].getA().getx() > intersection.getx() && 
+                 (*lines)[x].getB().getx() > intersection.getx()) || 
+               ( (*lines)[x].getA().getx() < intersection.getx() && 
+                 (*lines)[x].getB().getx() < intersection.getx() ) || 
+                 intersection.getx() < 0 || intersection.getx() > testpt.getx()){
             }
             else{
                 intersections++;
@@ -232,9 +238,13 @@ int main()
         }
         cout << "vertInts: " << vertexIntersections << endl;
         intersections = intersections + (int)(vertexIntersections / 2);
+        cout << "ints: " << intersections << endl;
         if(intersections % 2 == 0){
             valid = true;
             (*points).push_back(testpt);
+        }
+        else{
+            cout << "try again --" << endl;
         }
     }
     cout << fixed;
@@ -242,7 +252,7 @@ int main()
     ofstream txt;
     txt.open("points.txt");
     for(int x = 0; x < 4; x++){
-        txt << "(" << (*points)[x].getx() << ", " << (*points)[x].gety() << "), " << endl;
+        cout << "(" << (*points)[x].getx() << ", " << (*points)[x].gety() << "), " << endl;
     }
 
     //cleanup
