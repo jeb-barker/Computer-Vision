@@ -37,14 +37,22 @@ class Line{
         double dy;
         double m;
     public:
+        //undefined is meant to be a representation of whether or not the line is vertical.
+        bool undefined;
         Line(){}
         Line(double x1, double y1, double x2, double y2){
             a = Point(x1, y1);
             b = Point(x2, y2);
             dx = x2 - x1;
+            if(dx == 0){
+                undefined = true;
+            }
+            else{
+                m = dy / dx;
+            }
             dy = y2 - y1;
-            m = dy / dx;
         }
+        //Pythagorean distance formula (dx is the same thing as x2 - x1 and dy is the same as y2 - y1).
         double distance(){
             return sqrt((pow((dx), 2.0)+pow((dy), 2.0)));
         }
@@ -60,7 +68,7 @@ class Line{
         Point getB(){
             return b;
         }
-    //!must delete pointer after done! Finds intersection point between this Line and other Line.
+    //Finds intersection point between this Line and other Line.
     //Uses vector algebra to find intersection
     Point intersection(Line other){
         // This Line represented as a1x + b1y = c1
@@ -74,6 +82,8 @@ class Line{
         double c2 = a2*(other.getA().getx())+ b2*(other.getA().gety());
         double determinant = a1*b2 - a2*b1;
         if(determinant == 0){
+            //return a Point (5.0, 5.0) if the line is colinear. Maybe consider using NaN?
+            //There is a point to be made for either a large number like 5.0 or Nan.
             return Point(5.0, 5.0);
         }
         Point ret = Point((b2*c1 - b1*c2)/determinant, (a1*c2 - a2*c1)/determinant);
@@ -151,7 +161,7 @@ class Canvas{
         void addToPoints(Point a){
             (*polygonPoints).push_back(a);
         }
-
+        //returns a Point with two random doubles as x,y values.
         Point generatept(){
             Point points;
             points = Point(( (double) rand() ) / (RAND_MAX), ( (double) rand() ) / (RAND_MAX));
@@ -159,10 +169,11 @@ class Canvas{
         }
         //generate n (where n is a positive integer) Points, and then add them to polygonPoints. returns the class member variable polygonPoints which is a vector<Point*>
         vector<Point>* generatePoints(int n){
+            vector<Point>* r = new vector<Point>();
             for(int x = 0; x < n; x++){
-                addToPoints(generatept());
+                (*r).push_back(generatept());
             }
-            return polygonPoints;
+            return r;
         }
 
         void draw_grid(){
@@ -172,10 +183,10 @@ class Canvas{
             for(int i=0; i< SIZE; i++){
                 drawing << "\n";
                 for(int j=0; j < SIZE; j++){
-                    // cout << "abt to check draw";
+                    // std::cout<< "abt to check draw";
                     if(grid[j][i] == 10){
                         drawing << "0 0 0 ";
-                        // cout << "drawing pixel" << endl;
+                        // std::cout<< "drawing pixel" << endl;
                     }
                     else{
                         drawing << "255 255 255 ";
@@ -186,7 +197,7 @@ class Canvas{
         }
 
         void printVector(int index, vector<int> & vec){
-            cout << vec[0] << " " << vec[1] << " " << index << endl; 
+            std::cout<< vec[0] << " " << vec[1] << " " << index << endl; 
         };
 
         ~Canvas(){
@@ -195,68 +206,144 @@ class Canvas{
         }
 };
 
+vector<vector<Point>*> part1(){
+    vector< vector<Line> >* lines = new vector< vector<Line> >();
+    vector<vector<Point>*> points;
+    points.push_back(new vector<Point>());
+    points.push_back(new vector<Point>());
+    points.push_back(new vector<Point>());
+    points.push_back(new vector<Point>());
+    Point testpt;
+    bool valid = false;
+    
+    int intersections;
+    int vertexIntersections;
+    Canvas *t = new Canvas();
+    while(!valid){
+        delete lines;
+        for (int x = 0; x < 4; x++){
+            delete points[x];
+        }
+        lines = new vector< vector<Line> >();
+        points = vector<vector<Point>*>();
+        intersections = 0;
+        vertexIntersections = 0;
+        //The following groupings are all of the different combinations of three points
+        //that can make up a Triangle (with an extra point left off for testing)
+        points.push_back(new vector<Point>());
+        (*points[0]).push_back((*t).generatept());
+        (*points[0]).push_back((*t).generatept());
+        (*points[0]).push_back((*t).generatept());
+        testpt = (*t).generatept();
+        (*points[0]).push_back((*points[0])[0]);
+
+        points.push_back(new vector<Point>());
+        (*points[1]).push_back((*points[0])[0]);
+        (*points[1]).push_back((*points[0])[1]);
+        (*points[1]).push_back(testpt);
+        (*points[1]).push_back((*points[0])[0]);
+
+        points.push_back(new vector<Point>());
+        (*points[2]).push_back((*points[0])[0]);
+        (*points[2]).push_back(testpt);
+        (*points[2]).push_back((*points[0])[2]);
+        (*points[2]).push_back((*points[0])[0]);
+
+        points.push_back(new vector<Point>());
+        (*points[3]).push_back(testpt);
+        (*points[3]).push_back((*points[0])[1]);
+        (*points[3]).push_back((*points[0])[2]);
+        (*points[3]).push_back(testpt);
+
+        points.push_back(new vector<Point>());
+        (*points[4]).push_back(testpt);
+        (*points[4]).push_back((*points[0])[1]);
+        (*points[4]).push_back((*points[0])[2]);
+        (*points[4]).push_back((*points[0])[0]);
+        for(int y = 0; y < 4; y++){
+            (*lines).push_back(vector<Line>());
+            for(int x = 0; x < 3; x++){
+                Line a = Line((*points[y])[x].getx(), (*points[y])[x].gety(), (*points[y])[x+1].getx(), (*points[y])[x+1].gety());
+                (*lines)[y].push_back(a);
+            }
+        }
+
+        Line testLine = Line(0.0, testpt.gety(), testpt.getx(), testpt.gety());
+        bool keep_going = true;
+        for(int y = 0; y < 4; y++){
+            if(keep_going){
+                for(int x = 0; x < 3; x++){
+                    Point intersection = testLine.intersection((*lines)[y][x]);
+                    if(intersection.getx() == 5.0 && intersection.gety() == 5.0){
+                        //VERY VERY VERY rare case where the lines that are being tested are colinear
+                        //the intersection method in the Line class returns a Point of (5.0, 5.0) when
+                        //the two lines are colinear --> 5.0 is well outside the range of [0, 1).
+                        std::cout<< "COLINEAR!!!" << endl;
+                    }
+                    //boudaries for where an intersection is allowed to be (based on end points of lines)
+                    if((*lines)[y][x].getA().getx() > intersection.getx()-0.00001 && (*lines)[y][x].getA().getx() < intersection.getx()+0.00001){
+                        vertexIntersections++;
+                    }
+                    else if(( (*lines)[y][x].getA().getx() > intersection.getx() && 
+                        (*lines)[y][x].getB().getx() > intersection.getx()) || 
+                    ( (*lines)[y][x].getA().getx() < intersection.getx() && 
+                        (*lines)[y][x].getB().getx() < intersection.getx() ) || 
+                        intersection.getx() < 0 || intersection.getx() > testpt.getx()){
+                    }
+                    else{
+                        intersections++;
+                    }
+                    //a vertex intersection is handled slightly differently from a normal one-->
+                    //it counts as 2 intersections in practice, so they need to be divided by 2 to get the real value.
+                }
+            }
+            //TODO: Remove the random couts (not necessary, just might be nice).
+            std::cout<< "vertInts: " << vertexIntersections << endl;
+            intersections = intersections + (int)(vertexIntersections / 2);
+            std::cout<< "ints: " << intersections << endl;
+            //if number of intersections is even, it is outside the polygon
+            if(intersections % 2 == 0){
+                valid = true;
+            }
+            //if number of intersections is odd, try again with a newly generated set of points.
+            else{
+                std::cout<< "try again --" << endl;
+                keep_going = false;
+                valid = false;
+            }
+        }
+    }
+    //cleanup for part1().
+    //@Myself --> remember to check for any memory leaks/lazy programming...
+    delete lines;
+    delete t;
+    return points;
+}
+
 int main()
 {
     //seed the random number generator based on current time (makes it more random.)
     srand(time(NULL));
-    Canvas *t = new Canvas();
-    vector<Line>* lines = new vector<Line>();
-    vector<Point>* points;
-    points = (*t).generatePoints(3);
-    (*points).push_back((*points)[0]);
-    for(int x = 0; x < 3; x++){
-        Line a = Line((*points)[x].getx(), (*points)[x].gety(), (*points)[x+1].getx(), (*points)[x+1].gety());
-        (*lines).push_back(a);
-    }
-    (*points).pop_back();
-    bool valid = false;
-    Point testpt;
-    int intersections;
-    int vertexIntersections;
-    while(!valid){
-        intersections = 0;
-        vertexIntersections = 0;
-        testpt = (*t).generatept();
-        Line testLine = Line(0.0, testpt.gety(), testpt.getx(), testpt.gety());
-        for(int x = 0; x < 3; x++){
-            Point intersection = testLine.intersection((*lines)[x]);
-            if(intersection.getx() == 5.0 && intersection.gety() == 5.0){
-                cout << "COLINEAR!!!" << endl;
-            }
-            if(( (*lines)[x].getA().getx() > intersection.getx() && 
-                 (*lines)[x].getB().getx() > intersection.getx()) || 
-               ( (*lines)[x].getA().getx() < intersection.getx() && 
-                 (*lines)[x].getB().getx() < intersection.getx() ) || 
-                 intersection.getx() < 0 || intersection.getx() > testpt.getx()){
-            }
-            else{
-                intersections++;
-            }
-            if((*lines)[x].getA().getx() > intersection.getx()-0.00001 && (*lines)[x].getA().getx() < intersection.getx()+0.00001){
-                vertexIntersections++;
-            }
-        }
-        cout << "vertInts: " << vertexIntersections << endl;
-        intersections = intersections + (int)(vertexIntersections / 2);
-        cout << "ints: " << intersections << endl;
-        if(intersections % 2 == 0){
-            valid = true;
-            (*points).push_back(testpt);
-        }
-        else{
-            cout << "try again --" << endl;
-        }
-    }
-    cout << fixed;
-    cout << setprecision(17);
+    
+    std::cout<< fixed;
+    std::cout<< setprecision(17);
+    //ofstream txt will be used as a file outstream into a file
+    //points.txt contains the four randomly generated points that 
+    //follow the constraints laid out by part 1.
     ofstream txt;
     txt.open("points.txt");
+    txt<< fixed;
+    txt<< setprecision(17);
+
+    vector<vector<Point>*> points;
+    points = part1();
     for(int x = 0; x < 4; x++){
-        cout << "(" << (*points)[x].getx() << ", " << (*points)[x].gety() << "), " << endl;
+        txt << "(" << (*points[4])[x].getx() << ", " << (*points[4])[x].gety() << "), " << endl;
     }
 
     //cleanup
-    delete t;
-    delete lines;
+    for (int x = 0; x < 4; x++){
+        delete points[x];
+    }
     return 0;
 }
