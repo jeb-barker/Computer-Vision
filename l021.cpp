@@ -398,7 +398,7 @@ void part2(vector<Point> pts){
     lines_to_constr[2].push_back(Line(ax, ay, dx, dy));
     lines_to_constr[2].push_back(Line(bx, by, cx, cy));
 
-    for(int iter = 0; iter < 3; iter++){
+    for(int iter = 0; iter < 2; iter++){
         //TODO: drop perpendiculars and connect.
   Point e = Point(lines_to_constr[iter][0].perpendicular(lines_to_constr[iter][1].getA())[1].getB().getx(), lines_to_constr[iter][0].perpendicular(lines_to_constr[iter][1].getA())[1].getB().gety());
         lines_to_constr[iter].push_back(Line(lines_to_constr[iter][1].getB().getx(), lines_to_constr[iter][1].getB().gety(), e.getx(), e.gety()));
