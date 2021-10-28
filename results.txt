@@ -1,0 +1,8 @@
+part 1 duration: 0
+Minimum Distance: 0.013333
+Points: (0.047700, 0.549791) and (0.034822, 0.553240)
+
+part 2 duration: 0
+Minimum Distance: 0.015667
+Points: (0.034822, 0.553240) and (0.040376, 0.538591)
+

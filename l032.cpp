@@ -14,7 +14,7 @@
 #include<algorithm>
 
 #define SIZE 800
-#define NUM_POINTS 50000
+#define NUM_POINTS 60
 
 using namespace std;
 class Point{
@@ -37,6 +37,9 @@ class Point{
         }
         double dist(Point other){
             return sqrt((pow((other.getx() - x), 2.0)+pow((other.gety() - y), 2.0)));
+        }
+        string toString(){
+            return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
         }
         ~Point(){}
 };
@@ -292,20 +295,22 @@ class DistPoint{
         }
         DistPoint(Point one, Point two){
             Line d = Line(one.getx(), one.gety(), two.getx(), two.gety());
+            a = one;
+            b = two;
             distance = d.distance();
         }
         double getDistance(){
             return distance;
         }
-        Point* getA(){
-            return &a;
+        Point getA(){
+            return a;
         }
-        Point* getB(){
-            return &b;
+        Point getB(){
+            return b;
         }
 };
 
-void part1(){
+string part1(){
     Canvas c;
     srand(time(NULL));
     list<Point> points;
@@ -334,8 +339,8 @@ void part1(){
         }
     }
     std::chrono::milliseconds ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
-    cout << "part 1 duration: " << ms2.count() - ms.count() << endl;
-    cout << "minDist:" << minDist << endl;
+    //cout << "part 1 duration: " << ms2.count() - ms.count() << endl;
+    //cout << "minDist:" << minDist << endl;
 
     //draw 3 pixel circles around each point and then draw to points.ppm.
     for(std::list<Point>::iterator iter = points.begin(); iter != points.end(); ++iter){
@@ -348,6 +353,10 @@ void part1(){
     c.drawCircle((int)(minPoint2.getx()*SIZE), (int)(minPoint2.gety()*SIZE), 2, 15);
     c.draw_grid();
     txt.close();
+
+    string a = "part 1 duration: " + std::to_string(ms2.count() - ms.count()) + "\nMinimum Distance: " + std::to_string(minDist) + "\nPoints: " + minPoint1.toString() + " and " + minPoint2.toString() + "\n";
+    cout << a << endl;
+    return a;
 }
 
 bool compare(Point a, Point b){
@@ -361,7 +370,7 @@ DistPoint recursion_helper(int start_index, int end_index, vector<Point> &points
     if(end_index - start_index == 2){
         //DistPoint a, b, c;
         //DistPoint ret;
-        DistPoint a = DistPoint(points[start_index], points[start_index+1]);
+        DistPoint a = DistPoint(Point(points[start_index].getx(), points[start_index].gety()), points[start_index+1]);
         DistPoint b = DistPoint(points[start_index+1], points[end_index]);
         DistPoint c = DistPoint(points[start_index], points[end_index]);
 
@@ -371,11 +380,11 @@ DistPoint recursion_helper(int start_index, int end_index, vector<Point> &points
 
         if(b.getDistance() < min_dist){
             min_dist = b.getDistance();
-            ret = b;
+            ret = DistPoint(b.getA(), b.getB());
         }
         if(c.getDistance() < min_dist){
             min_dist = c.getDistance();
-            ret = c;
+            ret = DistPoint(c.getA(), c.getB());
         }
         return ret;
     }
@@ -383,26 +392,10 @@ DistPoint recursion_helper(int start_index, int end_index, vector<Point> &points
     left = recursion_helper(start_index, (int)((start_index+end_index)/2), points);
     right = recursion_helper((int)((start_index+end_index)/2)+1, end_index, points);
     DistPoint d = (left.getDistance() < right.getDistance()) ? left : right;
-
-    DistPoint maxD = d;
-
-    int middle = (int)((start_index+end_index)/2);
-    int left_index = middle;
-    int right_index = middle + 1;
-    while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index >= 0){
-        while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < NUM_POINTS){
-            double tempD = points[left_index].dist(points[right_index]);
-            if(tempD < maxD.getDistance()){
-                maxD = DistPoint(points[left_index], points[right_index]);
-            }
-            right_index++;
-        }
-        left_index--;
-    }
-    return maxD;
+    return d;
 }
 
-void part2_final(){
+string part2_final(){
     Canvas c;
     srand(time(NULL));
     vector<Point> points;
@@ -416,24 +409,57 @@ void part2_final(){
         points.push_back(Point(std::stod(line.substr(0, 25)), std::stod(line.substr(27, 25))));
         num_points++;
     }
+    //get starting time
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+    
     std::sort(points.begin(), points.end(), compare);
     DistPoint d = recursion_helper(0, points.size() - 1, points);
-    cout << "found d as: " << d.getDistance() << endl;
-    cout << "points of d: " << d.getA() << "   " << d.getB() << endl;
+    DistPoint maxD = d;
+
+    int middle = (int)((points.size()-1)/2);
+    int left_index = middle;
+    
+    while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index >= 0){
+        int right_index = left_index + 1;
+        while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < NUM_POINTS){
+            double tempD = points[left_index].dist(points[right_index]);
+            if(tempD < maxD.getDistance()){
+                maxD = DistPoint(points[left_index], points[right_index]);
+            }
+            right_index++;
+        }
+        left_index--;
+    }
+
+    for(int left = left_index; left < right_index; left++){
+        for((int right = left_index; right < right_index; right++){
+            
+        }
+    }
+    //cout << "found d as: " << d.getDistance() << endl;
+    //cout << "points of d: " << d.getA() << "   " << d.getB() << endl;
 
     //cout << "found Minimum Distance as: " << maxD.getDistance() << "\nPoints: " << maxD.getA() << "   " << maxD.getB() << endl;
+    //get ending time.
     std::chrono::milliseconds ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     
     
 
-    cout << "part 2 duration: " << ms2.count() - ms.count() << endl;
+    string a = "part 2 duration: " + std::to_string(ms2.count() - ms.count()) + "\nMinimum Distance: " + std::to_string(maxD.getDistance()) + "\nPoints: " + (maxD.getA()).toString() + " and " + (maxD.getB()).toString() + "\n";
+    cout << a << endl;
     txt.close();
+    return a;
 }
 
 int main(){
-    part1();
-    part2_final();
+    string a = part1();
+    string b = part2_final();
+    ofstream txt;
+    txt.open("results.txt");
+    txt<< fixed;
+    txt<< setprecision(23);
+
+    txt<< a << endl << b << endl;
 
     return 0;
 }
