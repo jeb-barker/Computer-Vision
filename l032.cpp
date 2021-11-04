@@ -14,7 +14,7 @@
 #include<algorithm>
 
 #define SIZE 800
-#define NUM_POINTS 60
+#define NUM_POINTS 1000000
 
 using namespace std;
 class Point{
@@ -29,10 +29,10 @@ class Point{
             x = x1;
             y = y1;
         }
-        double getx(){
+        double& getx(){
             return x;
         }
-        double gety(){
+        double& gety(){
             return y;
         }
         double dist(Point other){
@@ -302,10 +302,10 @@ class DistPoint{
         double getDistance(){
             return distance;
         }
-        Point getA(){
+        Point& getA(){
             return a;
         }
-        Point getB(){
+        Point& getB(){
             return b;
         }
 };
@@ -364,35 +364,81 @@ bool compare(Point a, Point b){
 }
 
 DistPoint recursion_helper(int start_index, int end_index, vector<Point> &points){
+    //cout << start_index << " to " << end_index << endl;
+    if(end_index - start_index <= 0){
+        return DistPoint(Point(0.0, 0.0), Point(100.0,100.0));
+    }
     if(end_index - start_index == 1){
+        //cout << points[start_index].toString() << " and " << points[end_index].toString() <<endl;
         return DistPoint(points[start_index], points[end_index]);
     }
     if(end_index - start_index == 2){
         //DistPoint a, b, c;
         //DistPoint ret;
-        DistPoint a = DistPoint(Point(points[start_index].getx(), points[start_index].gety()), points[start_index+1]);
+        //DistPoint a = DistPoint(Point(points[start_index].getx(), points[start_index].gety()), points[start_index+1]);
         DistPoint b = DistPoint(points[start_index+1], points[end_index]);
-        DistPoint c = DistPoint(points[start_index], points[end_index]);
+        // DistPoint c = DistPoint(points[start_index], points[end_index]);
+        //cout << points[start_index].toString() << " and " << points[end_index - 1].toString() << " and " << points[end_index].toString() <<endl;
 
-        DistPoint ret = a;
+        DistPoint ret = b;
 
-        double min_dist = a.getDistance();
+        // double min_dist = a.getDistance();
 
-        if(b.getDistance() < min_dist){
-            min_dist = b.getDistance();
-            ret = DistPoint(b.getA(), b.getB());
+        // if(b.getDistance() < min_dist){
+        //     min_dist = b.getDistance();
+        //     ret = DistPoint(b.getA(), b.getB());
+        // }
+        // if(c.getDistance() < min_dist){
+        //     min_dist = c.getDistance();
+        //     ret = DistPoint(c.getA(), c.getB());
+        // }
+        for(int left = start_index; left <= end_index; left++){
+            for(int right = start_index; right < left; right++){
+                double tempD = points[left].dist(points[right]);
+                if(tempD < ret.getDistance()){
+                    ret = DistPoint(points[left], points[right]);
+                }
+            }
         }
-        if(c.getDistance() < min_dist){
-            min_dist = c.getDistance();
-            ret = DistPoint(c.getA(), c.getB());
-        }
+        //cout << a.getDistance() << " -- " << b.getDistance() << " -- " << c.getDistance() << " -- \n" << ret.getDistance() << endl;
         return ret;
     }
-    DistPoint left, right;
-    left = recursion_helper(start_index, (int)((start_index+end_index)/2), points);
-    right = recursion_helper((int)((start_index+end_index)/2)+1, end_index, points);
+    DistPoint left, right, left2, right2;
+    int middle = ((start_index+end_index)/2);
+    left = recursion_helper(start_index, (((start_index+end_index)/2)+1) <= end_index ? ((start_index+end_index)/2)+1 : ((start_index+end_index)/2), points);
+
+    //left2 = recursion_helper(start_index, (int)((start_index+end_index)/2)+1, points);
+    right = recursion_helper((((start_index+end_index)/2)) >= start_index ? ((start_index+end_index)/2) : ((start_index+end_index)/2), end_index, points);
+
+    //right2 = recursion_helper((int)((start_index+end_index)/2)+2, end_index, points);
+    //cout << left.getDistance() << " --- " << right.getDistance() << "\n";
     DistPoint d = (left.getDistance() < right.getDistance()) ? left : right;
-    return d;
+    //DistPoint d2 = (left2.getDistance() < right2.getDistance()) ? left2 : right2;
+    //cout << d.getDistance() << "\n";
+    DistPoint maxD = d;//(d.getDistance() < d2.getDistance()) ? d : d2;
+
+    // int middle = (int)((points.size())/2);
+    // int left_index = middle-1;
+    // int right_index = middle + 1;
+    // while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index >= 0){
+    //     left_index--;
+    // }
+    // while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < NUM_POINTS){
+    //     right_index++;
+    // }
+
+    // for(int left = left_index+1; left < right_index-1; left++){
+    //     for(int right = left_index+1; right < left; right++){
+    //         double tempD = points[left].dist(points[right]);
+    //         cout << "O(n^2)" << endl;
+    //         if(tempD < maxD.getDistance()){
+    //             //cout << "LESS THAN" << endl;
+    //             maxD = DistPoint(points[left], points[right]);
+    //         }
+    //     }
+    // }
+
+    return maxD;
 }
 
 string part2_final(){
@@ -415,25 +461,25 @@ string part2_final(){
     std::sort(points.begin(), points.end(), compare);
     DistPoint d = recursion_helper(0, points.size() - 1, points);
     DistPoint maxD = d;
+    //cout << d.getDistance() <<  d.getA().toString() << endl;
 
     int middle = (int)((points.size()-1)/2);
-    int left_index = middle;
-    
+    int left_index = middle-1;
+     int right_index = left_index + 2;
     while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index >= 0){
-        int right_index = left_index + 1;
-        while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < NUM_POINTS){
-            double tempD = points[left_index].dist(points[right_index]);
-            if(tempD < maxD.getDistance()){
-                maxD = DistPoint(points[left_index], points[right_index]);
-            }
-            right_index++;
-        }
         left_index--;
     }
+    while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < NUM_POINTS){
+        right_index++;
+    }
 
-    for(int left = left_index; left < right_index; left++){
-        for((int right = left_index; right < right_index; right++){
-            
+    for(int left = left_index+1; left < right_index-1; left++){
+        for(int right = left_index+1; right < left; right++){
+            double tempD = points[left].dist(points[right]);
+            if(tempD < maxD.getDistance()){
+                //cout << "LESS THAN" << endl;
+                maxD = DistPoint(points[left], points[right]);
+            }
         }
     }
     //cout << "found d as: " << d.getDistance() << endl;
@@ -447,12 +493,16 @@ string part2_final(){
 
     string a = "part 2 duration: " + std::to_string(ms2.count() - ms.count()) + "\nMinimum Distance: " + std::to_string(maxD.getDistance()) + "\nPoints: " + (maxD.getA()).toString() + " and " + (maxD.getB()).toString() + "\n";
     cout << a << endl;
+    cout << fixed;
+    cout << setprecision(23);
+    cout << maxD.getDistance() << endl;
     txt.close();
     return a;
 }
 
 int main(){
-    string a = part1();
+    //string a = part1();
+    string a = "no part 1 rn \n";
     string b = part2_final();
     ofstream txt;
     txt.open("results.txt");
