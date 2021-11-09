@@ -12,9 +12,10 @@
 #include<chrono>
 #include<bits/stdc++.h>
 #include<algorithm>
+#include<sstream>
 
 #define SIZE 800
-#define NUM_POINTS 60
+#define NUM_POINTS 1000
 
 using namespace std;
 class Point{
@@ -39,7 +40,9 @@ class Point{
             return sqrt((pow((other.getx() - x), 2.0)+pow((other.gety() - y), 2.0)));
         }
         string toString(){
-            return "(" + std::to_string(x) + ", " + std::to_string(y) + ")";
+            std::stringstream a;
+            a << fixed << setprecision(23) << "(" << (x) << ", " << (y) << ")";
+            return a.str();
         }
         ~Point(){}
 };
@@ -353,10 +356,10 @@ string part1(){
     c.drawCircle((int)(minPoint2.getx()*SIZE), (int)(minPoint2.gety()*SIZE), 2, 15);
     c.draw_grid();
     txt.close();
-
-    string a = "part 1 duration: " + std::to_string(ms2.count() - ms.count()) + "\nMinimum Distance: " + std::to_string(minDist) + "\nPoints: " + minPoint1.toString() + " and " + minPoint2.toString() + "\n";
-    cout << a << endl;
-    return a;
+    std::stringstream a;
+    a << fixed << setprecision << "part 1 duration: " << (ms2.count() - ms.count()) << "\nMinimum Distance: " << (minDist) << "\nPoints: " << minPoint1.toString() << " and " << minPoint2.toString() << "\n";
+    cout << a.str() << endl;
+    return a.str();
 }
 
 bool compare(Point a, Point b){
@@ -472,11 +475,11 @@ string part2_final(){
     std::chrono::milliseconds ms2 = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     
     
-
-    string a = "part 2 duration: " + std::to_string(ms2.count() - ms.count()) + "\nMinimum Distance: " + std::to_string(maxD.getDistance()) + "\nPoints: " + (maxD.getA()).toString() + " and " + (maxD.getB()).toString() + "\n";
-    cout << a << endl;
+    std::stringstream a;
+    a << fixed << setprecision(23) << "part 2 duration: " << (ms2.count() - ms.count()) << "\nMinimum Distance: " << (maxD.getDistance()) << "\nPoints: " << (maxD.getA()).toString() << " and " << (maxD.getB()).toString() << "\n";
+    cout << a.str() << endl;
     txt.close();
-    return a;
+    return a.str();
 }
 
 string part3(){
@@ -541,9 +544,9 @@ string part3(){
 }
 
 int main(){
-    string a = part1();
+    string b = part1();
+    string a = part2_final();
     //string a = "no part 1 rn \n";
-    string b = part2_final();
     ofstream txt;
     txt.open("results.txt");
     txt<< fixed;

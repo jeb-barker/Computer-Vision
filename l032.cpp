@@ -14,7 +14,7 @@
 #include<algorithm>
 
 #define SIZE 800
-#define NUM_POINTS 1000000
+#define NUM_POINTS 100000
 
 using namespace std;
 class Point{
@@ -501,14 +501,14 @@ string part2_final(){
 }
 
 int main(){
-    //string a = part1();
+    string a = part1();
     string a = "no part 1 rn \n";
     string b = part2_final();
     ofstream txt;
     txt.open("results.txt");
     txt<< fixed;
     txt<< setprecision(23);
-
+    //look into string streams for precision...
     txt<< a << endl << b << endl;
 
     return 0;
