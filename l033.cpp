@@ -15,7 +15,7 @@
 #include<sstream>
 
 #define SIZE 800
-#define NUM_POINTS 1000000
+#define NUM_POINTS 750000
 
 using namespace std;
 class Point{
@@ -531,8 +531,8 @@ DistPoint recursion_helper3(int start_index, int end_index, vector<Point> &point
     }
     DistPoint left, right;
     int middle = ((start_index+end_index)/2);
-    left = recursion_helper(start_index, middle, points);
-    right = recursion_helper(middle, end_index, points);
+    left = recursion_helper3(start_index, middle, points);
+    right = recursion_helper3(middle, end_index, points);
     
     DistPoint d = (left.getDistance() < right.getDistance()) ? left : right;
     DistPoint maxD = d;
@@ -548,12 +548,16 @@ DistPoint recursion_helper3(int start_index, int end_index, vector<Point> &point
         right_index++;
     }
     std::sort(strippoints.begin(), strippoints.end(), compareY);
-    for(int left = left_index + 1; left < right_index; left++){
-        for(int right = 0; right < 16 && right < strippoints.size(); right++){
+    for(int left = 0; left < right_index - left_index; left++){
+        //cout << left << endl;
+        //the strippoints[right] will always be > strippoints[left] ... the thing below is always positive.
+        for(int right = left+1; (strippoints[right].gety() - strippoints[left].gety()) < maxD.getDistance() && right < strippoints.size(); right++){
             double tempD = points[left].dist(strippoints[right]);
-            if(tempD != maxD.getDistance()){
+            //cout << "hi?" << endl;
+            if(tempD > 0.0){
+                //cout << "bigger than: " << tempD << endl;
                 if(tempD < maxD.getDistance()){
-                    cout << "oh no" << points[left].toString() << " " << strippoints[right].toString() << endl;
+                    //cout << "oh no" << points[left].toString() << " " << strippoints[right].toString() << endl;
                     maxD = DistPoint(points[left], strippoints[right]);
                 }
             }
@@ -581,7 +585,7 @@ string part3(){
     std::chrono::milliseconds ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
     
     std::sort(points.begin(), points.end(), compare);
-    DistPoint d = recursion_helper(0, points.size() - 1, points);
+    DistPoint d = recursion_helper3(0, points.size() - 1, points);
     DistPoint maxD = d;
     //cout << d.getDistance() <<  d.getA().toString() << endl;
 
@@ -589,21 +593,25 @@ string part3(){
     int left_index = middle;
     int right_index = middle+1;
     vector<Point> strippoints;
-    while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index >= 0){
+    while(points[left_index].getx() >= points[middle].getx() - d.getDistance() && left_index > 0){
         strippoints.push_back(points[left_index]);
         left_index--;
     }
-    while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index <= NUM_POINTS){
+    while(points[right_index].getx() <= points[middle].getx() + d.getDistance() && right_index < num_points){
         strippoints.push_back(points[right_index]);
         right_index++;
     }
     std::sort(strippoints.begin(), strippoints.end(), compareY);
-    for(int left = left_index + 1; left < right_index; left++){
-        for(int right = 0; right < 16 && right < strippoints.size(); right++){
+    //cout << "hi?" << endl;
+    for(int left = 0; left < strippoints.size(); left++){
+        //the strippoints[right] will always be > strippoints[left] ... the thing below is always positive.
+        for(int right = left+1; (strippoints[right].gety() - strippoints[left].gety()) < maxD.getDistance() && right < strippoints.size(); right++){
             double tempD = points[left].dist(strippoints[right]);
-            if(tempD > 0){
+            cout << "hi?" << endl;
+            if(tempD > 0.0){
+                cout << "bigger than: " << tempD << endl;
                 if(tempD < maxD.getDistance()){
-                    //cout << "LESS THAN" << endl;
+                    cout << "oh no" << points[left].toString() << " " << strippoints[right].toString() << endl;
                     maxD = DistPoint(points[left], strippoints[right]);
                 }
             }
@@ -622,7 +630,7 @@ string part3(){
 
 int main(){
     //string b = part1();
-    generate_points(); // use for when part 1 isn't in use. Only generates points.
+    //generate_points(); // use for when part 1 isn't in use. Only generates points.
     string b = "";
     string a = part2_final();
     string c = part3();
