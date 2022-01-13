@@ -1,3 +1,4 @@
+   
 //Jeb Barker
 //Slightly Overdue - Apologies
 #include<iostream>
@@ -11,6 +12,8 @@
 #include<list>
 
 #define SIZE 100
+
+typedef std::vector< std::vector<int> > vector2;
 
 using namespace std;
 class Point{
@@ -302,13 +305,13 @@ class RGB{
         ~RGB(){}
 };
 
-void draw_grid(vector<vector<int>> &grid, int width, int height, int max, string fname){
+void draw_grid(vector2 &grid, int width, int height, int max, string fname){
     ofstream drawing;
     drawing.open(fname);
     drawing << "P3 "<< width << " "<< height << " " << max;
-    for(int i=0; i < width; i++){
+    for(int j=0; j < height; j++){
         drawing << "\n";
-        for(int j=0; j < height; j++){
+        for(int i=0; i < width; i++){
             drawing << grid[i][j] << " " << grid[i][j] << " " << grid[i][j] << " ";
         }
     }
@@ -336,9 +339,9 @@ int main(){
     fstream txt;
     cout << "here" << endl;
    int height, width;
-    vector<vector<int>> input = vector<vector<int>>();
-    vector<vector<int>> gradient = vector<vector<int>>();
-    vector<vector<int>> outputVector = vector<vector<int>>();
+    vector2 input = vector2();
+    vector2 gradient = vector2();
+    vector2 outputVector = vector2();
     
     txt.open("puppy.ppm", ios::in);
     string line;
@@ -377,8 +380,8 @@ int main(){
         }
     }
     int running_total = 0;
-    for(int x = 0; x < width; x++){
-        for(int y = 0; y < height; y++){
+    for(int y = 0; y < height; y++){
+        for(int x = 0; x < width; x++){
             //cout << input[x].size() << endl;
             //cout << running_total << input[x][y] << endl;
             input[x][y] = tempList[running_total];
@@ -389,15 +392,14 @@ int main(){
     cout << "created greyscale" << endl;
     draw_grid(input, width, height, max, "imageg.ppm");
     int a,b,c,d,e,f,g,h,i, gx, gy, grad;
-    for(int y = 1; y < height-1; y++){
-        for(int x = 1; x < width-1; x++){
-            // if((x == 0) || (x == (width-1)) || (y == 0) || (y == (height-1))){
-            //     gradient[x][y] = 0;
-            //     //input[x][y] = 0;
-            //     outputVector[x][y] = 0;
-            // }
-            // else{
-                
+    for(int y = 0; y < height; y++){
+        for(int x = 0; x < width; x++){
+            if((x == 0) || (x == (width-1)) || (y == 0) || (y == (height-1))){
+                gradient[x][y] = 0;
+                input[x][y] = 0;
+                outputVector[x][y] = 0;
+            }
+            else{
                 a = input[x-1][y-1];
                 b = input[x][y-1];
                 c = input[x+1][y-1];
@@ -412,14 +414,14 @@ int main(){
                 gy = g - a - (2*b) + (2*h) + i - c;
                 grad = (int)(sqrt((pow(gx, 2.0)+pow(gy, 2.0))));
                 
-                //gradient[x][y] = grad;
-                if(gx > 60){
+                gradient[x][y] = grad;
+                if(grad > 60){
                     outputVector[x][y] = 1;
                 }
                 else{
                     outputVector[x][y] = 0;
                 }
-            //}
+            }
         }
     }//gradient contains the image with the sobal operator in place.
     draw_grid(outputVector, width, height, 1, "imagem.ppm");
