@@ -1,5 +1,5 @@
-//Jeb Barker 
-//Due Before Break???
+//Jeb Barker
+//Slightly Overdue - Apologies
 #include<iostream>
 #include<iomanip>
 #include<fstream>
@@ -10,7 +10,7 @@
 #include <math.h>
 #include<list>
 
-#define SIZE = 100
+#define SIZE 100
 
 using namespace std;
 class Point{
@@ -69,7 +69,7 @@ class Line{
             return dy;
         }
         Point getA(){
-            return a; 
+            return a;
         }
         Point getB(){
             return b;
@@ -113,7 +113,7 @@ class Canvas{
     public:
         Canvas(){
             polygonPoints = new vector<Point>();
-            grid = new int[height][width];
+            grid = new int[SIZE][SIZE];
         }
 
         double distance(Point a, Point b){
@@ -179,7 +179,7 @@ class Canvas{
                 y2 = yt;
             }
             int dx = x2 - x1;
-            int dy = y2 - y1; 
+            int dy = y2 - y1;
             int inc = 1;
             if(dy < 0){
                 inc = -1;
@@ -246,10 +246,10 @@ class Canvas{
         void draw_grid(){
             ofstream drawing;
             drawing.open("output.ppm");
-            drawing << "P3 "<< width << " "<< height << " 1";
-            for(int i=0; i< height; i++){
+            drawing << "P3 "<< SIZE << " "<< SIZE << " 1";
+            for(int i=0; i< SIZE; i++){
                 drawing << "\n";
-                for(int j=0; j < width; j++){
+                for(int j=0; j < SIZE; j++){
                     // std::cout<< "abt to check draw";
                     if(grid[j][i] == 10){
                         drawing << "0 0 0 ";
@@ -267,7 +267,7 @@ class Canvas{
         }
 
         void printVector(int index, vector<int> & vec){
-            std::cout<< vec[0] << " " << vec[1] << " " << index << endl; 
+            std::cout<< vec[0] << " " << vec[1] << " " << index << endl;
         };
 
         ~Canvas(){
@@ -302,20 +302,127 @@ class RGB{
         ~RGB(){}
 };
 
+void draw_grid(vector<vector<int>> &grid, int width, int height, int max, string fname){
+    ofstream drawing;
+    drawing.open(fname);
+    drawing << "P3 "<< width << " "<< height << " " << max;
+    for(int i=0; i < width; i++){
+        drawing << "\n";
+        for(int j=0; j < height; j++){
+            drawing << grid[i][j] << " " << grid[i][j] << " " << grid[i][j] << " ";
+        }
+    }
+    drawing.close();
+};
+
+vector<string> split(const string& str, const string& delim) //using this for ppm parsing ease.
+{
+    vector<string> tokens;
+    size_t prev = 0, pos = 0;
+    do
+    {
+        pos = str.find(delim, prev);
+        if (pos == string::npos) pos = str.length();
+        string token = str.substr(prev, pos-prev);
+        if (!token.empty()) tokens.push_back(token);
+        prev = pos + delim.length();
+    }
+    while (pos < str.length() && prev < str.length());
+    return tokens;
+}
 
 int main(){
+    cout << "hereeee";
+    fstream txt;
+    cout << "here" << endl;
    int height, width;
-   txt.open("points.txt", ios::in);
-   string line;
-   int num_points = 0;
-   getline(txt, line);
+    vector<vector<int>> input = vector<vector<int>>();
+    vector<vector<int>> gradient = vector<vector<int>>();
+    vector<vector<int>> outputVector = vector<vector<int>>();
+    
+    txt.open("puppy.ppm", ios::in);
+    string line;
+    getline(txt, line);
    //line is the P3 W H line right now... do smth accordingly.
-   while(getline(txt, line)){
-       points.push_back(Point(std::stod(line.substr(0, 25)), std::stod(line.substr(27, 25))));
-       num_points++;
-   }
-   RGB(*grid)[SIZE];
-   grid = new RGB[height][width];
+    vector<string> splitter = split(line, " ");
+    width = std::stod(splitter[1]);
+    height = std::stod(splitter[2]);
+    int max = std::stod(splitter[3]);
+    cout << width << " " << height << " " << max << endl;
+
+    for(int x = 0; x < width; x++){
+        input.push_back(vector<int>());
+        gradient.push_back(vector<int>());
+        outputVector.push_back(vector<int>());
+        for(int y = 0; y < height; y++){
+            input[x].push_back(0);
+            gradient[x].push_back(0);
+            outputVector[x].push_back(0);
+            
+        }
+    }
+    vector<int> tempList;
+    while(getline(txt, line)){
+        splitter = split(line, " ");
+        for(int x = 0; x < (int)(splitter.size()/3); x++){
+            //cout << a[3 * x] << " " << a[(3 * x) + 1] << " " << a[(3 * x) + 2] << endl;
+            if(splitter[3 * x] != ""){
+                int r = std::stod(splitter[3 * x]);
+                int g = std::stod(splitter[(3 * x) + 1]);
+                int b = std::stod(splitter[(3 * x) + 2]);
+                int sum = r + g + b;
+                sum = (int)(sum/3);
+                tempList.push_back(sum);
+            }
+        }
+    }
+    int running_total = 0;
+    for(int x = 0; x < width; x++){
+        for(int y = 0; y < height; y++){
+            //cout << input[x].size() << endl;
+            //cout << running_total << input[x][y] << endl;
+            input[x][y] = tempList[running_total];
+            //cout << "h" << endl;
+            running_total+=1;
+        }
+    }//input contains a greyscale image.
+    cout << "created greyscale" << endl;
+    draw_grid(input, width, height, max, "imageg.ppm");
+    int a,b,c,d,e,f,g,h,i, gx, gy, grad;
+    for(int y = 1; y < height-1; y++){
+        for(int x = 1; x < width-1; x++){
+            // if((x == 0) || (x == (width-1)) || (y == 0) || (y == (height-1))){
+            //     gradient[x][y] = 0;
+            //     //input[x][y] = 0;
+            //     outputVector[x][y] = 0;
+            // }
+            // else{
+                
+                a = input[x-1][y-1];
+                b = input[x][y-1];
+                c = input[x+1][y-1];
+                d = input[x-1][y];
+                e = input[x][y];
+                f = input[x+1][y];
+                g = input[x-1][y+1];
+                h = input[x][y+1];
+                i = input[x+1][y+1];
+                
+                gx = c - a - (2 * d) + (2*f) - g + i;
+                gy = g - a - (2*b) + (2*h) + i - c;
+                grad = (int)(sqrt((pow(gx, 2.0)+pow(gy, 2.0))));
+                
+                //gradient[x][y] = grad;
+                if(gx > 60){
+                    outputVector[x][y] = 1;
+                }
+                else{
+                    outputVector[x][y] = 0;
+                }
+            //}
+        }
+    }//gradient contains the image with the sobal operator in place.
+    draw_grid(outputVector, width, height, 1, "imagem.ppm");
    
     
     return 1;
