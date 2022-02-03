@@ -627,6 +627,7 @@ int circlePart1(int t1, int t2, string fname){
     vector2 finalVector = vector2();
     vector2 outputVector = vector2();
     vector2 angleVector = vector2(); 
+    vector2 voteVector = vector2();
     vector2double doubleAngleVector = vector2double();
     
     txt.open(fname, ios::in);
@@ -665,6 +666,7 @@ int circlePart1(int t1, int t2, string fname){
         outputVector.push_back(vector<int>());
         angleVector.push_back(vector<int>());
         finalVector.push_back(vector<int>());
+        voteVector.push_back(vector<int>());
         doubleAngleVector.push_back(vector<double>());
         for(int y = 0; y < height; y++){
             input[x].push_back(0);
@@ -673,6 +675,7 @@ int circlePart1(int t1, int t2, string fname){
             angleVector[x].push_back(0);
             finalVector[x].push_back(0);
             doubleAngleVector[x].push_back(0.0);
+            voteVector[x].push_back(0);
         }
     }
     int running_total = 0;
@@ -860,7 +863,7 @@ int circlePart1(int t1, int t2, string fname){
             if(finalVector[x][y] == 1){
                 ex = cos(doubleAngleVector[x][y]);
                 why = sin(doubleAngleVector[x][y]);
-                circler.bresenham_pos(x - (ex*100), y - (why*100), x + (ex*100), y + (why*100));
+                circler.bresenham_pos(x - (ex*100), y - (why*100), x + (ex*100), y + (why*100), voteVector);
             }
         }
     }
