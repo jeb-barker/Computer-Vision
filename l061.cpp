@@ -11,7 +11,7 @@
 #include <math.h>
 #include<list>
 
-#define SIZE 100
+#define SIZE 4000
 #define THRESHOLD_1 150
 #define THRESHOLD_2 200
 #define PI 3.1415926535
@@ -128,14 +128,6 @@ class Canvas{
             return d.distance();
         }
 
-        void drawSquare(Line l){
-            int ax, ay, bx, by;
-            ax = (int)((l.getA().getx() + (l.getdx()*2))*SIZE);
-            ay = (int)((l.getA().gety() + (l.getdy()*2))*SIZE);
-            bx = (int)((l.getB().getx() - (l.getdx()*2))*SIZE);
-            by = (int)((l.getB().gety() - (l.getdy()*2))*SIZE);
-            bresenham_pos(ax, ay, bx, by);
-        }
 
         void drawCircle(int x1, int y1, int r, int code, vector2& grid){
             int x = 0;
@@ -222,7 +214,7 @@ class Canvas{
                 int i = x1;
                 int m = dx - dy;
                 for(int j = y1; j < y2; j++){
-                    if(i >= 0 && i < SIZE && j >= 0 && j < SIZE){grid[i][j] += 1;}
+                    if(i >= 0 && i < SIZE && j >= 0 && j < SIZE){grid[i][j] += 1;} //need to change SIZE here to something else...
                     if(m >= 0){
                         i += inc;
                         m -= dy;
@@ -688,7 +680,7 @@ int circlePart1(int t1, int t2, string fname){
             running_total+=1;
         }
     }//input contains a greyscale image.
-    //std::cout << "created greyscale" << endl;
+    std::cout << "created greyscale" << endl;
     draw_grid(input, width, height, max, "imageg.ppm");
     int a,b,c,d,e,f,g,h,i, gx, gy, grad;
     double angleTemp;
@@ -752,13 +744,13 @@ int circlePart1(int t1, int t2, string fname){
             }
         }
     }//gradient contains the image with the sobal operator in place.
-    //std::cout << "gradients computed." << endl;
+    std::cout << "gradients computed." << endl;
     //apply areaFill to the vector2 gradient...
 
     //weird error possibly due to stack size... try using pointers to make sure it doesn't blow the stack.
     areaFill(outputVector, width, height);
 
-    //std::cout << "areaFilled outputVector" << endl;
+    std::cout << "areaFilled outputVector" << endl;
     //outputVector = gradient;
     for(int y = 0; y < height; y++){
         for(int x = 0; x < width; x++){
@@ -853,20 +845,31 @@ int circlePart1(int t1, int t2, string fname){
     draw_grid(outputVector, width, height, 1, "image1.ppm");
     draw_grid(angleVector, width, height, 1, "image2.ppm");
     draw_grid(finalVector, width, height, 1, "imagef.ppm");
-    
+    cout << "done with part3" << endl;
     //For every 1 in finalVector, bresenham in the voting vector2 in the direction of the Angle in doubleAngleVector.
     double ex;
     double why;
     Canvas circler;
     for(int y = 0; y < height; y++){
         for(int x = 0; x < width; x++){
-            if(finalVector[x][y] == 1){
+            if(finalVector[x][y] == 0){
                 ex = cos(doubleAngleVector[x][y]);
                 why = sin(doubleAngleVector[x][y]);
                 circler.bresenham_pos(x - (ex*100), y - (why*100), x + (ex*100), y + (why*100), voteVector);
             }
         }
     }
+    int voteMax = 0;
+    for(int y = 0; y < height; y++){
+        for(int x = 0; x < width; x++){
+            if(voteVector[x][y] > voteMax){
+                voteMax = voteVector[x][y];
+            }
+        }
+    }
+    
+    
+    draw_grid(voteVector, width, height, voteMax, "imageVote.ppm");
     
    return 1;
 }
@@ -894,6 +897,6 @@ int main(int argc, char *argv[]){
     
     //part1(); // single threshold
     //part2(); //double threshold
-    part3(t1, t2, fname); //TRIPLE THRESHOLD... just kidding: NMS
+    circlePart1(t1, t2, fname); //TRIPLE THRESHOLD... just kidding: NMS
     return 1;
 }
